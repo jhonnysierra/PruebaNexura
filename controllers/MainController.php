@@ -31,9 +31,7 @@
         $role = $employee->getRole();
 
         $sql="insert into empleado values('$id', '$name', '$email', '$gender', '$deparment', '$newsletter', '$description')";
-        echo "SQL:".$sql;
         $result = mysqli_query($conexion, $sql);
-        echo "REsultado:".$result;
 
     }
 
