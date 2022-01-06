@@ -44,7 +44,7 @@
             </div>
             <div class="col">
 
-                <form name="listaempleados" method="post" action="ListaEmpleados.php">
+                <form name="listaempleados" method="post" action="EmployeeList.php">
                     <table class="table">
                       <thead>
                         <tr>
@@ -65,6 +65,11 @@
                     </table>                   
                     
                 </form>
+                <div class="row mb-3 justify-content-center">
+                    <div class="col-sm-5">
+                        <a class="btn btn-info btn-lg" href="javascript:history.back(-1);" role="link">Crear Empleado</a>
+                        </div>
+                    </div>
 
             </div>
             <div class="col-2">

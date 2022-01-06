@@ -1,6 +1,31 @@
 <?php 
 
-    //require_once('../../config/config.php');
+    require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
+    require(constant('PATH').'/controllers/MainController.php');
+    require(constant('PATH').'/models/Employee.php');
+    //require(constant('PATH').'/libs/conexion_li.php');
+
+    if($_POST['btnGuardar']=='guardar'){
+
+        $idUser= generateIdEmployee();
+        $name= $_REQUEST['nombreCompleto'];
+        $email= $_REQUEST['correo'];
+        $gender= $_REQUEST['sexoRadio'];
+        $deparment = $_REQUEST['area'];
+        if(isset($_POST['boletin'])){
+            $newsletter = "1";
+        }else{
+            $newsletter = "0";
+        }
+        $description = $_REQUEST['descripcion'];
+        $role = "";
+
+        $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $role);
+
+        //echo "Empleado:".$employee->getId();
+        saveEmployee($employee);
+
+    }        
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -32,7 +57,7 @@
     <!--container-->
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col" style="border-style: dashed;border-width: 1px;">
+            <div class="col">
                 <h1 class="display-4 text-center">Crear Empleado</h1>
             </div>
         </div>
@@ -44,18 +69,18 @@
             </div>
             <div class="col">
 
-                <form name="main" method="post" action="MainApplication.php">
+                <form name="main" method="post" action="views/main/MainApplication.php">
                     <div class="row mb-3 justify-content-center">
                         <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo *</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="nombreCompleto" placeholder="Nombre completo del empleado">
+                            <input type="text" class="form-control" id="nombreCompleto" name="nombreCompleto"placeholder="Nombre completo del empleado">
                         </div>
                     </div>
 
                     <div class="row mb-3 justify-content-center">
                         <label for="correo" class="col-sm-3 col-form-label">Correo electrónico *</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="correo" placeholder="Correo electrónico">
+                            <input type="text" class="form-control" id="correo" name="correo" placeholder="Correo electrónico">
                         </div>
                     </div>
 
@@ -63,13 +88,13 @@
                         <label for="sexoRadio" class="col-sm-3 col-form-label">Sexo *</label>
                         <div class="col-sm-8">
                           <div class="form-check">
-                            <input class="form-check-input" type="radio" name="sexoRadio" id="femenino" value="option1" checked>
+                            <input class="form-check-input" type="radio" name="sexoRadio" id="femenino" value="F" checked>
                             <label class="form-check-label" for="sexoRadio">
                               Femenino
                             </label>
                           </div>
                           <div class="form-check">
-                            <input class="form-check-input" type="radio" name="sexoRadio" id="masculono" value="option2">
+                            <input class="form-check-input" type="radio" name="sexoRadio" id="masculino" value="M">
                             <label class="form-check-label" for="sexoRadio">
                               Masculino
                             </label>
@@ -80,9 +105,15 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="area" class="col-sm-3 col-form-label">Area *</label>
                         <div class="col-sm-8">
-                            <select id="area" class="form-select">
-                                <option selected>Choose...</option>
-                                <option>...</option>
+                            <?php
+                                $result = listArea();
+                            ?>
+                            <select id="area" name="area" class="form-select">
+                            <?php
+                                while($rowArea = mysqli_fetch_array($result, MYSQLI_NUM)){
+                                   echo "<option value='".$rowArea[0]."'>".$rowArea[1]."</option>";
+                                }
+                            ?>
                             </select>
                         </div>
                     </div>
@@ -90,30 +121,41 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="descripcion" class="col-sm-3 col-form-label">Descripción *</label>
                         <div class="col-sm-8">
-                            <textarea class="form-control" placeholder="Descripción de la experiencia del empleado" id="descripcion"></textarea>
+                            <textarea class="form-control" placeholder="Descripción de la experiencia del empleado" id="descripcion" name="descripcion"></textarea>
                         </div>
                     </div>
 
                     <div class="row mb-3 justify-content-center">
                         <div class="col-sm-5">
-                            <input class="form-check-input mt-2" type="checkbox" id="boletin" value="" aria-label="Deseo recibir boletín informativo">
+                            <input class="form-check-input mt-2" type="checkbox" id="boletin" value="" name="boletin" aria-label="Deseo recibir boletín informativo">
                             <label for="boletin" class="col-sm-8 col-form-label">Deseo recibir boletín informativo</label>
                         </div>                        
                     </div>
 
                     <div class="row mb-3 justify-content-center">
-                        <label for="roles" class="col-sm-3 col-form-label">Roles *</label>
-                        <div class="col-sm-8">
-                            <input class="form-check-input mt-2" type="checkbox" id="rol1" value="" aria-label="Deseo recibir boletín informativo">
-                            <label for="rol1" class="col-sm-8 col-form-label">Rol1</label>
-                        </div>                        
+                        <?php
+                            $resultRole = listRoles();
+                        ?>
+                        <label class="col-sm-3 col-form-label">Roles *</label>
+                        
+                            <?php
+                            while($rowRole = mysqli_fetch_array($resultRole, MYSQLI_NUM)){
+                                echo'
+                                <div class="col-sm-8">
+                                <input class="form-check-input mt-2" type="checkbox" id="'.$rowRole[0].'" value="'.$rowRole[1].'" aria-label="Rol Empleado">
+                                <label for="rol1" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
+                                </div>
+                                ';
+                            }
+                            ?>
+                        
                     </div>
 
                     <div class="row mb-3 justify-content-center">
                         <div class="col-sm-5">
-                            <button type="button" class="btn btn-primary btn-lg btn-block login-button"  name="btnGuardar" value="guardar" id="guardar" data-toggle="modal" data-target="#" onclick="">Crear cuenta</button>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block login-button"  name="btnGuardar" value="guardar" id="guardar" data-toggle="modal" data-target="#" onclick="">Guardar</button>
 
-                            <a class="btn btn-info btn-lg" href="views/main/ListaEmpleados.php" role="link">Lista empleados</a>
+                            <a class="btn btn-info btn-lg" href="views/main/EmployeeList.php" role="link">Lista empleados</a>
                         </div>
                     </div>
                     
