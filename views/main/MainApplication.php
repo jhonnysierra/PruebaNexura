@@ -136,6 +136,7 @@
                         <?php
                             $resultRole = listRoles();
                         ?>
+                        
                         <label class="col-sm-3 col-form-label">Roles *</label>
                         
                             <?php
@@ -145,6 +146,7 @@
                                 <input class="form-check-input mt-2" type="checkbox" id="'.$rowRole[0].'" value="'.$rowRole[1].'" aria-label="Rol Empleado">
                                 <label for="rol1" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
                                 </div>
+                                <label class="col-sm-3 col-form-label"></label>
                                 ';
                             }
                             ?>

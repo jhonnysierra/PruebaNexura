@@ -1,13 +1,13 @@
 <?php
     require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
-    
+    require_once(constant('PATH').'/libs/conexion_li.php');
+
+    $conexionLi = $conexion;
     
     function listArea(){
-        include(constant('PATH').'/libs/conexion_li.php');   
-
         $sql="select a.id,a.nombre from areas a";
         
-        return mysqli_query($conexion, $sql);
+        return mysqli_query($GLOBALS["conexionLi"], $sql);
     }
 
     function listRoles(){
