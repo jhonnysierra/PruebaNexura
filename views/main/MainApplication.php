@@ -1,5 +1,5 @@
 <?php 
-
+    error_reporting(0);
     require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
     require(constant('PATH').'/controllers/MainController.php');
     require(constant('PATH').'/models/Employee.php');
@@ -10,20 +10,31 @@
         $idUser= generateIdEmployee();
         $name= $_REQUEST['nombreCompleto'];
         $email= $_REQUEST['correo'];
-        $gender= $_REQUEST['sexoRadio'];
+        $gender = $_REQUEST['sexoRadio'];
         $deparment = $_REQUEST['area'];
+
         if(isset($_POST['boletin'])){
             $newsletter = "1";
         }else{
             $newsletter = "0";
         }
+
         $description = $_REQUEST['descripcion'];
         $role = "";
 
         $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $role);
 
-        //echo "Empleado:".$employee->getId();
-        saveEmployee($employee);
+        $roles = $_POST['roles'];
+
+        echo "Roles: ".$roles;
+
+        if(!empty($_POST['roles'])){
+            foreach($_POST['roles'] as $selected){
+            echo $selected."</br>";
+            }
+        }
+        
+        //saveEmployee($employee);
 
     }        
 ?>
@@ -69,7 +80,7 @@
             </div>
             <div class="col">
 
-                <form name="main" method="post" action="views/main/MainApplication.php">
+                <form name="main" method="post" action="MainApplication.php">
                     <div class="row mb-3 justify-content-center">
                         <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo *</label>
                         <div class="col-sm-8">
@@ -143,7 +154,7 @@
                             while($rowRole = mysqli_fetch_array($resultRole, MYSQLI_NUM)){
                                 echo'
                                 <div class="col-sm-8">
-                                <input class="form-check-input mt-2" type="checkbox" id="'.$rowRole[0].'" value="'.$rowRole[1].'" aria-label="Rol Empleado">
+                                <input class="form-check-input mt-2" type="checkbox" id="'.$rowRole[0].'" value="'.$rowRole[1].'" name="roles[]" aria-label="Rol Empleado">
                                 <label for="rol1" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
                                 </div>
                                 <label class="col-sm-3 col-form-label"></label>
@@ -157,7 +168,7 @@
                         <div class="col-sm-5">
                             <button type="submit" class="btn btn-primary btn-lg btn-block login-button"  name="btnGuardar" value="guardar" id="guardar" data-toggle="modal" data-target="#" onclick="">Guardar</button>
 
-                            <a class="btn btn-info btn-lg" href="views/main/EmployeeList.php" role="link">Lista empleados</a>
+                            <a class="btn btn-info btn-lg" href="EmployeeList.php" role="link">Lista empleados</a>
                         </div>
                     </div>
                     

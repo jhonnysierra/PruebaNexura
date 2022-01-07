@@ -1,6 +1,12 @@
 <?php 
-    //require_once 'views/main/MainApplication.php';
     require('config/config.php');
-    require_once('views/main/MainApplication.php');
 ?>
 
+<script type="text/javascript">
+
+    window.onload = function() {
+        var url = "views/main/MainApplication.php";
+        window.location.href = url;
+    }
+
+</script>
