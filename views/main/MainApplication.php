@@ -1,9 +1,8 @@
 <?php 
-    error_reporting(0);
+    //error_reporting(0);
     require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
     require(constant('PATH').'/controllers/MainController.php');
     require(constant('PATH').'/models/Employee.php');
-    //require(constant('PATH').'/libs/conexion_li.php');
 
     if($_POST['btnGuardar']=='guardar'){
 
@@ -20,31 +19,28 @@
         }
 
         $description = $_REQUEST['descripcion'];
-        $role = "";
 
-        $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $role);
-
-        $roles = $_POST['roles'];
-
-        echo "Roles: ".$roles;
+        $roles = array();
 
         if(!empty($_POST['roles'])){
             foreach($_POST['roles'] as $selected){
-            echo $selected."</br>";
+                array_push($roles, $selected);
             }
         }
-        
-        //saveEmployee($employee);
 
+        $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $roles);
+
+        saveEmployee($employee);
     }        
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 
     <title>Prueba Técnica Desarrollador PHP Nexura</title>
 
-    <?php require (constant('PATH').'/views/shared/__header.php'); ?>
+    <?php require(constant('PATH').'/views/shared/__header.php');?>
 
     <style type="text/css">
 
@@ -144,6 +140,7 @@
                     </div>
 
                     <div class="row mb-3 justify-content-center">
+
                         <?php
                             $resultRole = listRoles();
                         ?>
@@ -154,14 +151,13 @@
                             while($rowRole = mysqli_fetch_array($resultRole, MYSQLI_NUM)){
                                 echo'
                                 <div class="col-sm-8">
-                                <input class="form-check-input mt-2" type="checkbox" id="'.$rowRole[0].'" value="'.$rowRole[1].'" name="roles[]" aria-label="Rol Empleado">
-                                <label for="rol1" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
+                                <input class="form-check-input mt-2" type="checkbox" id=rol"'.$rowRole[0].'" value="'.$rowRole[0].'" name="roles[]" aria-label="Rol Empleado">
+                                <label for=rol"'.$rowRole[0].'" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
                                 </div>
                                 <label class="col-sm-3 col-form-label"></label>
                                 ';
                             }
                             ?>
-                        
                     </div>
 
                     <div class="row mb-3 justify-content-center">
@@ -186,5 +182,11 @@
     <?php require_once(constant('PATH').'/views/shared/__footer.php'); ?>
 
 </body>
-
 </html>
+
+    <script type="text/javascript">
+        //var myModal = document.getElementById('myModal');
+        var myModal = new bootstrap.Modal(document.getElementById('myModal'));
+        myModal.show();
+
+    </script>

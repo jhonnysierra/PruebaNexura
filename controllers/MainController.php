@@ -1,6 +1,7 @@
 <?php
     require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
     require_once(constant('PATH').'/libs/conexion_li.php');
+    require(constant('PATH').'/libs/alerts.php');
 
     $conexionLi = $conexion;
     
@@ -19,8 +20,6 @@
     }
 
     function saveEmployee(Employee $employee){
-        include(constant('PATH').'/libs/conexion_li.php');
-        echo "Id:".$employee->getId();
         $id = $employee->getId();
         $name = $employee->getName();
         $email = $employee->getEmail();
@@ -28,11 +27,24 @@
         $deparment = $employee->getDeparment();
         $description = $employee->getDescription();
         $newsletter = $employee->getNewsletter();
-        $role = $employee->getRole();
+        $roles = $employee->getRole();
 
-        $sql="insert into empleado values('$id', '$name', '$email', '$gender', '$deparment', '$newsletter', '$description')";
-        $result = mysqli_query($conexion, $sql);
+        $sql1 = "insert into empleado values('$id', '$name', '$email', '$gender', '$deparment', '$newsletter', '$description')";
+        $result1 = mysqli_query($GLOBALS["conexionLi"], $sql1);
 
+        if (!empty($roles)) {
+            foreach($roles as $rol){
+                $sql2 = "insert into empleado_rol values('$id','$rol')";
+                $result2 = mysqli_query($GLOBALS["conexionLi"], $sql2);
+            }
+        }
+       
+
+        if ($result1 == true && $result2==true) {
+            alertSucces("Se guardó la información del empleado exitosamente.");
+        }else{
+            alertError("Algo salió mal!!! La información no se pudo guardar.");
+        }
     }
 
     function generateIdEmployee(){
