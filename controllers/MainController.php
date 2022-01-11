@@ -38,7 +38,6 @@
                 $result2 = mysqli_query($GLOBALS["conexionLi"], $sql2);
             }
         }
-       
 
         if ($result1 == true && $result2==true) {
             alertSucces("Se guardó la información del empleado exitosamente.");

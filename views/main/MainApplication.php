@@ -26,11 +26,14 @@
             foreach($_POST['roles'] as $selected){
                 array_push($roles, $selected);
             }
+        }   
+
+        if (!empty($idUser) && !empty($name) && !empty($email) && !empty($gender) && !empty($deparment)) {
+            $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $roles);
+            saveEmployee($employee);      
+        }else{
+            alertError("Los campos con * son obligatorios");
         }
-
-        $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $roles);
-
-        saveEmployee($employee);
     }        
 ?>
 
@@ -76,18 +79,18 @@
             </div>
             <div class="col">
 
-                <form name="main" method="post" action="MainApplication.php">
+                <form name="main" id="mainForm" method="post" action="MainApplication.php">
                     <div class="row mb-3 justify-content-center">
                         <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo *</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="nombreCompleto" name="nombreCompleto"placeholder="Nombre completo del empleado">
+                            <input type="text" class="form-control" id="nombreCompleto" name="nombreCompleto"placeholder="Nombre completo del empleado" required>
                         </div>
                     </div>
 
                     <div class="row mb-3 justify-content-center">
                         <label for="correo" class="col-sm-3 col-form-label">Correo electrónico *</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="correo" name="correo" placeholder="Correo electrónico">
+                            <input type="text" class="form-control" id="correo" name="correo" placeholder="Correo electrónico" required>
                         </div>
                     </div>
 
@@ -116,6 +119,7 @@
                                 $result = listArea();
                             ?>
                             <select id="area" name="area" class="form-select">
+                                <option value="">--Seleccione Area--</option>
                             <?php
                                 while($rowArea = mysqli_fetch_array($result, MYSQLI_NUM)){
                                    echo "<option value='".$rowArea[0]."'>".$rowArea[1]."</option>";
@@ -162,7 +166,7 @@
 
                     <div class="row mb-3 justify-content-center">
                         <div class="col-sm-5">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block login-button"  name="btnGuardar" value="guardar" id="guardar" data-toggle="modal" data-target="#" onclick="">Guardar</button>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block login-button"  name="btnGuardar" value="guardar" id="guardar" data-toggle="modal" data-target="#" onclick="validateForm();">Guardar</button>
 
                             <a class="btn btn-info btn-lg" href="EmployeeList.php" role="link">Lista empleados</a>
                         </div>
@@ -184,9 +188,28 @@
 </body>
 </html>
 
-    <script type="text/javascript">
-        //var myModal = document.getElementById('myModal');
-        var myModal = new bootstrap.Modal(document.getElementById('myModal'));
-        myModal.show();
+<script type="text/javascript">
+    
+    function validateForm(){
+        var form = document.getElementById("mainForm");
+        var name = document.getElementById('nombreCompleto');
+        var email = document.getElementById('correo');
+        var gender = document.querySelectorAll('input[name="sexoRadio"]:checked');
+        var area = document.getElementById('area');
+        
+        var description = document.getElementById('descripcion');
+        //var chListRoles = document.getElementsByName('roles[]');
+        var listRoles = document.querySelectorAll('input[name="roles[]"]:checked');
 
-    </script>
+        console.log(listRoles);
+        
+
+        if (name.value!="" && email.value!="" && gender.length>0 && area.selectedIndex!=0 && description.value!="" && listRoles.length>0) {
+            console.log(area.value);
+            form.submit();
+        }else{
+            alert('Faltan datos');
+        }        
+    }
+
+</script>
