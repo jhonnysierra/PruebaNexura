@@ -12,11 +12,9 @@
     }
 
     function listRoles(){
-        include(constant('PATH').'/libs/conexion_li.php');   
-
         $sql="select r.id, r.nombre from roles r";
         
-        return mysqli_query($conexion, $sql);
+        return mysqli_query($GLOBALS["conexionLi"], $sql);
     }
 
     function saveEmployee(Employee $employee){
@@ -28,6 +26,9 @@
         $description = $employee->getDescription();
         $newsletter = $employee->getNewsletter();
         $roles = $employee->getRole();
+
+        $transaction = "START TRANSACTION";
+        mysqli_query($GLOBALS["conexionLi"], $transaction);
 
         $sql1 = "insert into empleado values('$id', '$name', '$email', '$gender', '$deparment', '$newsletter', '$description')";
         $result1 = mysqli_query($GLOBALS["conexionLi"], $sql1);
@@ -44,13 +45,14 @@
         }else{
             alertError("Algo salió mal!!! La información no se pudo guardar.");
         }
+
+        $transaction = "COMMIT";
+        mysqli_query($GLOBALS["conexionLi"], $transaction);
     }
 
     function generateIdEmployee(){
-        include(constant('PATH').'/libs/conexion_li.php');   
-
         $maxId = "select max(id)+1 from empleado";
-        $exeMaxId = mysqli_query($conexion, $maxId);
+        $exeMaxId = mysqli_query($GLOBALS["conexionLi"], $maxId);
         $resulMaxId = mysqli_fetch_row($exeMaxId);
 
         return $resulMaxId[0];
