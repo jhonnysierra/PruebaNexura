@@ -1,8 +1,11 @@
 <?php 
-    error_reporting(0);
+    //error_reporting(0);
     require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
-    require(constant('PATH').'/controllers/MainController.php');
-    require(constant('PATH').'/models/Employee.php');
+    require(constant('PATH').'/controllers/EmployeeListController.php');
+
+    $idEmployee = base64_decode($_GET['id']);
+    $employee = queryEmployee($idEmployee);
+
 
     /**
      * Se valida si se presiono el boton guardar. Se captura la informacion ingresada en el formulario y se
@@ -68,12 +71,12 @@
     </style>
 </head>
 
-<body>    
+<body onload="noBack();">    
     <!--container-->
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col">
-                <h1 class="display-4 text-center">Crear Empleado</h1>
+                <h1 class="display-4 text-center">Modificar Empleado</h1>
             </div>
         </div>
         
@@ -84,18 +87,18 @@
             </div>
             <div class="col">
 
-                <form name="main" id="mainForm" method="post" action="MainApplication.php">
+                <form name="modify" id="modifyForm" method="post" action="ModifyEmployee.php">
                     <div class="row mb-3 justify-content-center">
                         <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo *</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="nombreCompleto" name="nombreCompleto"placeholder="Nombre completo del empleado" required>
+                            <input type="text" class="form-control" id="nombreCompleto" name="nombreCompleto"placeholder="Nombre completo del empleado" value="<?php echo $employee->getName();?>" required>
                         </div>
                     </div>
 
                     <div class="row mb-3 justify-content-center">
                         <label for="correo" class="col-sm-3 col-form-label">Correo electrónico *</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="correo" name="correo" placeholder="Correo electrónico" required>
+                            <input type="text" class="form-control" id="correo" name="correo" placeholder="Correo electrónico" value="<?php echo $employee->getEmail();?>" required>
                         </div>
                     </div>
 
@@ -103,7 +106,8 @@
                         <label for="sexoRadio" class="col-sm-3 col-form-label">Sexo *</label>
                         <div class="col-sm-8">
                           <div class="form-check">
-                            <input class="form-check-input" type="radio" name="sexoRadio" id="femenino" value="F" checked>
+
+                            <input class="form-check-input" type="radio" name="sexoRadio" id="femenino" value="F">
                             <label class="form-check-label" for="sexoRadio">
                               Femenino
                             </label>
@@ -114,6 +118,21 @@
                               Masculino
                             </label>
                           </div>
+                            <?php 
+                                if ($employee->getGender()=='F') {
+                                    echo '
+                                        <script type="text/javascript">
+                                            document.querySelector("#femenino").checked = true;
+                                        </script>
+                                    ';
+                                } else {
+                                    echo '
+                                        <script type="text/javascript">
+                                            document.querySelector("#masculino").checked = true;
+                                        </script>
+                                    ';
+                                }
+                            ?>
                         </div>
                     </div>                    
 
@@ -121,13 +140,22 @@
                         <label for="area" class="col-sm-3 col-form-label">Area *</label>
                         <div class="col-sm-8">
                             <?php
-                                $result = listArea();
+                                $result = listAreas();
                             ?>
                             <select id="area" name="area" class="form-select">
                                 <option value="">--Seleccione Area--</option>
                             <?php
                                 while($rowArea = mysqli_fetch_array($result, MYSQLI_NUM)){
-                                   echo "<option value='".$rowArea[0]."'>".$rowArea[1]."</option>";
+                                   echo "<option value='".$rowArea[0]."' id='".$rowArea[0]."'>".$rowArea[1]."</option>";
+
+                                   if ($employee->getDeparment()['id'] == $rowArea[0]) {
+                                        echo '
+                                            <script type="text/javascript">
+                                                var area = document.getElementById("area");
+                                                area.options.namedItem('.$rowArea[0].').selected = true;
+                                            </script>
+                                        ';
+                                   }
                                 }
                             ?>
                             </select>
@@ -137,7 +165,7 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="descripcion" class="col-sm-3 col-form-label">Descripción *</label>
                         <div class="col-sm-8">
-                            <textarea class="form-control" placeholder="Descripción de la experiencia del empleado" id="descripcion" name="descripcion"></textarea>
+                            <textarea class="form-control" placeholder="Descripción de la experiencia del empleado" id="descripcion" name="descripcion" ><?php echo $employee->getDescription();?></textarea>
                         </div>
                     </div>
 
@@ -145,7 +173,16 @@
                         <div class="col-sm-5">
                             <input class="form-check-input mt-2" type="checkbox" id="boletin" value="" name="boletin" aria-label="Deseo recibir boletín informativo">
                             <label for="boletin" class="col-sm-8 col-form-label">Deseo recibir boletín informativo</label>
-                        </div>                        
+                        </div>
+                        <?php 
+                            if ($employee->getNewsletter() == "1") {
+                                echo '
+                                        <script type="text/javascript">
+                                            document.querySelector("#boletin").checked = true;
+                                        </script>
+                                    ';
+                            }
+                        ?>                      
                     </div>
 
                     <div class="row mb-3 justify-content-center">
@@ -157,23 +194,29 @@
                         <label class="col-sm-3 col-form-label">Roles *</label>
                         
                             <?php
-                            while($rowRole = mysqli_fetch_array($resultRole, MYSQLI_NUM)){
-                                echo'
-                                <div class="col-sm-8">
-                                <input class="form-check-input mt-2" type="checkbox" id=rol"'.$rowRole[0].'" value="'.$rowRole[0].'" name="roles[]" aria-label="Rol Empleado">
-                                <label for=rol"'.$rowRole[0].'" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
-                                </div>
-                                <label class="col-sm-3 col-form-label"></label>
-                                ';
-                            }
+                                while($rowRole = mysqli_fetch_array($resultRole, MYSQLI_NUM)){
+                                    echo'
+                                    <div class="col-sm-8">
+                                    <input class="form-check-input mt-2" type="checkbox" id="rol'.$rowRole[0].'" value="'.$rowRole[0].'" name="roles[]" aria-label="Rol Empleado">
+                                    <label for=rol"'.$rowRole[0].'" class="col-sm-8 col-form-label">'.$rowRole[1].'</label>
+                                    </div>
+                                    <label class="col-sm-3 col-form-label"></label>
+                                    ';                               
+                                }
+                                
+                                foreach ($employee->getRole() as $key => $value) {
+                                    echo '
+                                            <script type="text/javascript">
+                                                document.querySelector("#rol'.$key.'").checked = true;
+                                            </script>
+                                        ';
+                                }
                             ?>
                     </div>
 
                     <div class="row mb-3 justify-content-center">
                         <div class="col-sm-5">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block login-button"  name="btnGuardar" value="guardar" id="guardar" data-toggle="modal" data-target="#" onclick="validateForm();">Guardar</button>
-
-                            <a class="btn btn-info btn-lg" href="EmployeeList.php" role="link">Lista empleados</a>
+                            <button type="button" class="btn btn-primary btn-lg btn-block login-button"  name="btnModificar" value="modificar" id="modificar" data-toggle="modal" data-target="#" onclick="validateForm();">Modificar</button>
                         </div>
                     </div>
                     
@@ -185,6 +228,21 @@
             </div>
         </div>
 
+        <!-- Modal para error de formulario-->
+        <div class="modal fade" id="myModalError" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="myModalErrorLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body" id="modal-body"></div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
     <!--container-->
     </div>
 
@@ -193,14 +251,25 @@
 </body>
 </html>
 
+
+
 <script type="text/javascript">
+    /**
+     * Funcion que permite deshabilitar en retroceso en la pagina
+     */
+    function noBack() {
+        window.location.hash="no-back-button";
+        window.location.hash="Again-No-back-button" //chrome
+        window.onhashchange=function(){window.location.hash="no-back-button";}
+    }
+
     /**
      * Funcion javascript que permite validar el formulario antes de ser enviado. Se realiza la validacion de
      * los campos que no se encuentren vacios. En caso de que falte algun campo obligatorio se detiene el
      * envio del formulario.
      */
     function validateForm(){
-        var form = document.getElementById("mainForm");
+        var form = document.getElementById("modifyForm");
         var name = document.getElementById('nombreCompleto');
         var email = document.getElementById('correo');
         var gender = document.querySelectorAll('input[name="sexoRadio"]:checked');
@@ -212,7 +281,12 @@
         if (name.value!="" && email.value!="" && gender.length>0 && area.selectedIndex!=0 && description.value!="" && listRoles.length>0) {
             form.submit();
         }else{
-            alert('Faltan datos');
+            document.getElementById("modal-body").innerHTML = "Faltan Datos. Los campos * son obligatorios";
+
+            var myModalError = new bootstrap.Modal(document.getElementById("myModalError"));
+            myModalError.show();
+
+            return false;
         }        
     }
-</script>
+</script>   

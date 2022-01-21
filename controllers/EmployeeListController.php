@@ -5,6 +5,7 @@
     require(constant('PATH').'/models/Employee.php');
 
     $conexionLi = $conexion;
+
     /**
      * Funcion que permite listar todos los empleados registrados
      * @return Array Employee Arreglo de objetos de la clase Employee
@@ -19,7 +20,7 @@
         
         while($rowEmployee = mysqli_fetch_array($resultList, MYSQLI_NUM)){
             $listRoles = listRolesEmployee($rowEmployee[0]);
-            $listArea = listArea($rowEmployee[4]);
+            $listArea = listAreaEmployee($rowEmployee[4]);
             $employee = new Employee($rowEmployee[0], $rowEmployee[1], $rowEmployee[2], $rowEmployee[3], $listArea, $rowEmployee[5], $rowEmployee[6], $listRoles);
             array_push($listEmployee, $employee);
         }
@@ -46,7 +47,6 @@
             $listRoles["$rowRoles[0]"] = $rowRoles[1];
             //$arrayTemp = array_merge($arrayTemp, $arrayTemp["$rowRoles[0]"] => $rowRoles[1]);
         }
-
         return $listRoles;
     }
     
@@ -55,7 +55,7 @@
      * @param type $idArea Codigo del area en la que se encuentra registrado un empleado
      * @return Array asociativo con el codigo y area en la que se encuentra un empelado
      */
-    function listArea($idArea){
+    function listAreaEmployee($idArea){
         $sql="select a.id, a.nombre from areas a where a.id='$idArea'";
         $resultList = mysqli_query($GLOBALS["conexionLi"], $sql);
 
@@ -112,6 +112,33 @@
                 </script>
             ';
         }
-
     }
+
+    function queryEmployee($idEmployee){
+        $sql = "select e.id, e.nombre, e.email, e.sexo, a.id, e.descripcion, e.boletin FROM empleado e, areas a where e.area_id = a.id AND e.id = $idEmployee";
+        $resultList = mysqli_query($GLOBALS["conexionLi"], $sql);
+
+        $listRoles = array();
+        $listArea = array();
+        
+        while($rowEmployee = mysqli_fetch_array($resultList, MYSQLI_NUM)){
+            $listRoles = listRolesEmployee($rowEmployee[0]);
+            $listArea = listAreaEmployee($rowEmployee[4]);
+            $employee = new Employee($rowEmployee[0], $rowEmployee[1], $rowEmployee[2], $rowEmployee[3], $listArea, $rowEmployee[5], $rowEmployee[6], $listRoles);
+        }
+        return $employee;
+    }
+
+
+    function listAreas(){
+        $sql="select a.id,a.nombre from areas a";
+        
+        return mysqli_query($GLOBALS["conexionLi"], $sql);
+    }
+
+    function listRoles(){
+        $sql="select r.id, r.nombre from roles r";
+        
+        return mysqli_query($GLOBALS["conexionLi"], $sql);
+    }  
 ?>
