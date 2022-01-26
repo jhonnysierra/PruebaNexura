@@ -1,20 +1,19 @@
 <?php 
-    //error_reporting(0);
+    error_reporting(0);
     require_once($_SERVER["DOCUMENT_ROOT"].'/PruebaNexura/config/config.php');
     require(constant('PATH').'/controllers/EmployeeListController.php');
 
     $idEmployee = base64_decode($_GET['id']);
     $employee = queryEmployee($idEmployee);
 
-
     /**
      * Se valida si se presiono el boton guardar. Se captura la informacion ingresada en el formulario y se
      * crea una clase de tipo empleado. Se envia el objeto a la clase controlador para que se realice
      * el ingreso de la informacion a la base de datos.
      */
-    if($_POST['btnGuardar']=='guardar'){
-
-        $idUser= generateIdEmployee();
+    if($_POST['btnModificar']=='modificar'){
+        echo "Se envio el formulario al servidor";
+        $idUser= $employee->getId();
         $name= $_REQUEST['nombreCompleto'];
         $email= $_REQUEST['correo'];
         $gender = $_REQUEST['sexoRadio'];
@@ -37,8 +36,8 @@
         }   
 
         if (!empty($idUser) && !empty($name) && !empty($email) && !empty($gender) && !empty($deparment)) {
-            $employee = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $roles);
-            saveEmployee($employee);      
+            $employeeModify = new Employee($idUser, $name, $email, $gender, $deparment, $description, $newsletter, $roles);
+            updateEmployee($employeeModify);
         }else{
             alertError("Los campos con * son obligatorios");
         }
@@ -87,7 +86,14 @@
             </div>
             <div class="col">
 
-                <form name="modify" id="modifyForm" method="post" action="ModifyEmployee.php">
+                <form name="modify" id="modifyForm" method="POST" action="<?php echo 'ModifyEmployee?id='.base64_encode($idEmployee);?>" onsubmit="return validateForm();">
+                    <div class="row mb-3 justify-content-center" id="idEmployeeDiv">
+                        <label for="idEmployee" class="col-sm-3 col-form-label">Id *</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="idEmployee" name="idEmployee"placeholder="Identificacion del empleado" pattern="[0-9]{1,10}" value="<?php echo $employee->getId();?>" required>
+                        </div>
+                    </div>
+
                     <div class="row mb-3 justify-content-center">
                         <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo *</label>
                         <div class="col-sm-8">
@@ -216,7 +222,7 @@
 
                     <div class="row mb-3 justify-content-center">
                         <div class="col-sm-5">
-                            <button type="button" class="btn btn-primary btn-lg btn-block login-button"  name="btnModificar" value="modificar" id="modificar" data-toggle="modal" data-target="#" onclick="validateForm();">Modificar</button>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block login-button"  name="btnModificar" value="modificar" id="modificar" data-toggle="modal" data-target="#">Modificar</button>
                         </div>
                     </div>
                     
@@ -254,6 +260,16 @@
 
 
 <script type="text/javascript">
+    
+    $(document).ready(function(){
+        var textIdEmployee = document.getElementById('idEmployee');
+        textIdEmployee.disabled=true;
+        document.getElementById('idEmployeeDiv').style.display = 'none';
+        textIdEmployee.addEventListener('click', function(e) {
+            textIdEmployee.disabled = true;
+        });
+    });
+
     /**
      * Funcion que permite deshabilitar en retroceso en la pagina
      */
@@ -270,6 +286,7 @@
      */
     function validateForm(){
         var form = document.getElementById("modifyForm");
+        var idEmployee = document.getElementById('idEmployee');
         var name = document.getElementById('nombreCompleto');
         var email = document.getElementById('correo');
         var gender = document.querySelectorAll('input[name="sexoRadio"]:checked');
@@ -279,7 +296,7 @@
         
 
         if (name.value!="" && email.value!="" && gender.length>0 && area.selectedIndex!=0 && description.value!="" && listRoles.length>0) {
-            form.submit();
+                return true;
         }else{
             document.getElementById("modal-body").innerHTML = "Faltan Datos. Los campos * son obligatorios";
 

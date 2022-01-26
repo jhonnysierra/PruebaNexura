@@ -64,7 +64,7 @@
                             $resultList = listEmployee();
                             foreach($resultList as $rowEmployee){
                                 echo "<tr>";
-                                echo "<td>".$rowEmployee->getId()."</td>";
+                                echo "<td>".$rowEmployee->getName()."</td>";
                                 echo "<td>".$rowEmployee->getEmail()."</td>";
                                 echo "<td>".$rowEmployee->getGender()."</td>";
                                 echo "<td>".$rowEmployee->getDeparment()['nombre']."</td>";

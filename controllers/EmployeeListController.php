@@ -129,13 +129,65 @@
         return $employee;
     }
 
+    function updateEmployee(Employee $employee){
+        $id = $employee->getId();
+        $name = $employee->getName();
+        $email = $employee->getEmail();
+        $gender = $employee->getGender(); 
+        $deparment = $employee->getDeparment();
+        $description = $employee->getDescription();
+        $newsletter = $employee->getNewsletter();
+        $roles = $employee->getRole();
 
+        $transaction = "START TRANSACTION";
+        mysqli_query($GLOBALS["conexionLi"], $transaction);
+
+        $sql1 = "UPDATE empleado SET nombre = '$name', email = '$email', sexo = '$gender', area_id = '$deparment', boletin = '$newsletter', descripcion = '$description' WHERE id = $id";
+        $result1 = mysqli_query($GLOBALS["conexionLi"], $sql1);
+
+        // Se elimina los roles del empleado de la tabla empleado_rol
+        $sql2 = "DELETE FROM empleado_rol WHERE empleado_id=$id";
+        $result2 = mysqli_query($GLOBALS["conexionLi"], $sql2);
+
+        if (!empty($roles)) {
+            foreach($roles as $rol){
+                $sql3 = "insert into empleado_rol values('$id','$rol')";
+                $result3 = mysqli_query($GLOBALS["conexionLi"], $sql3);
+            }
+        }
+
+        $transaction = "COMMIT";
+        mysqli_query($GLOBALS["conexionLi"], $transaction);    
+
+        if ($result1 == true && $result2 == true && $result3 == true) {
+            alertSucces("Se guardó la información del empleado exitosamente.");
+            echo '
+                <script type="text/javascript">
+                    var modalupdate = document.getElementById("myModal");
+                    modalupdate.addEventListener("hidden.bs.modal", function () {
+                        window.location = "EmployeeList.php";
+                    });
+                </script>
+            ';
+
+        }else{
+            alertError("Algo salió mal!!! La información no se pudo guardar.");
+        }
+    }
+
+
+    /**
+     * Lista todas las areas para cargar en la lista del formulario
+     */
     function listAreas(){
         $sql="select a.id,a.nombre from areas a";
         
         return mysqli_query($GLOBALS["conexionLi"], $sql);
     }
 
+    /**
+     * Lista todos los roles para cargar en el formulario
+     */
     function listRoles(){
         $sql="select r.id, r.nombre from roles r";
         
